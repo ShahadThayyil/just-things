@@ -4,6 +4,8 @@ import Home from './pages/Home.jsx';
 import Lenis from 'lenis';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import Portfolio from './pages/Portfolio.jsx';
+import { BrowserRouter as Router,Routes,Route } from 'react-router-dom';
 
 // Register ScrollTrigger globally
 gsap.registerPlugin(ScrollTrigger);
@@ -45,8 +47,13 @@ function App() {
 
   return (
     <div className="w-full min-h-screen bg-[#0A0A0A] text-white antialiased">
-      <Navbar />
-      <Home/>
+      <Navbar/>
+      <Router>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/Portfolio" element={<Portfolio />} />
+        </Routes>
+      </Router>
     </div>
   );
 }

@@ -122,7 +122,8 @@ const Navbar = forwardRef((props, ref) => {
           {navLinks.map((item) => (
             <a 
               key={item} 
-              href="#" 
+              //if item is "Home" then href="/" else href={item}
+              href={item === 'Home' ? '/' : `/${item}`}
               className="relative group overflow-hidden text-gray-400 hover:text-white transition-colors pb-1"
             >
               {item}
