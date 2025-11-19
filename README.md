@@ -1,16 +1,106 @@
-# React + Vite
+# Just-Things Production Studio — Portfolio Website
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A fast, modern, and responsive **React + Vite** based portfolio website for **Just-Things Production Studio**.
+This site showcases the studio’s creative work, production services, photography, cinematography, and brand identity — all wrapped in a clean and minimal visual experience.
 
-Currently, two official plugins are available:
+## 🖥️ Live Demo
+> _Add link here once deployed._
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🚀 Features
+- ⚡ Super-fast development with **Vite**
+- 🎨 Modern UI built using **React**
+- 🖼️ Responsive layout for all devices
+- 🎬 Smooth transitions & animations
+- 📁 Modular, scalable folder structure
+- 🌐 Fully static — deploy anywhere
+- 🛡️ SEO-friendly & optimised
 
-## React Compiler
+## 📂 Project Structure
+```
+just-things-portfolio/
+│── public/
+│── src/
+│   ├── assets/
+│   ├── components/
+│   ├── pages/
+│   ├── styles/
+│   ├── App.jsx
+│   └── main.jsx
+│── index.html
+│── package.json
+│── vite.config.js
+│── README.md
+```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## ⚙️ Installation & Setup
 
-## Expanding the ESLint configuration
+### 1. Clone the repository
+```
+git clone https://github.com/your-username/just-things-portfolio.git
+cd just-things-portfolio
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### 2. Install dependencies
+```
+npm install
+```
+
+## 🧪 Development
+```
+npm run dev
+```
+
+## 📦 Build for Production
+```
+npm run build
+npm run preview
+```
+
+## 🌐 Deployment
+
+### Netlify
+```
+netlify deploy
+```
+
+### Vercel
+```
+vercel
+```
+
+### GitHub Pages
+Update `vite.config.js`:
+```
+base: '/just-things-portfolio/'
+```
+
+## 🎨 Branding
+Showcasing:
+- Photography
+- Cinematography
+- Creative storytelling
+- Modern minimal UI
+
+## 🛠 Available Scripts
+| Script | Description |
+|--------|-------------|
+| dev | Start Vite dev server |
+| build | Build production bundle |
+| preview | Preview production bundle |
+
+## 🧰 Tech Stack
+- React 18
+- Vite
+- JavaScript / JSX
+- CSS / Tailwind (optional)
+- Framer Motion (optional)
+
+## 🤝 Contributing
+Pull requests are welcome.
+
+## 📝 License
+MIT License
+
+## 📧 Contact
+Just-Things Production Studio
+Email: _add email_
