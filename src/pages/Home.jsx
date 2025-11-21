@@ -2,6 +2,9 @@ import React from 'react'
 import HeroSection from '../components/HeroSection'
 import CategorySection from '../components/Categories'
 import FeaturedProjects from '../components/FeaturedProjects'
+import AboutUs from '../components/AboutUS'
+import ServicesSection from '../components/ServiceSection'
+import OnePhotoSection from '../components/OnePhotoSection'
 
 const Home = () => {
   return (
@@ -9,6 +12,9 @@ const Home = () => {
         <HeroSection/>
         <CategorySection />
         <FeaturedProjects />
+        <AboutUs/>
+        <ServicesSection />
+        <OnePhotoSection />
     </div>
   )
 }

@@ -1,9 +1,9 @@
 import React from 'react'
-import ScrollExpandMedia from './components/scroll-expand-media.jsx'
+import ScrollExpandMedia from '../components/scroll-expand-media.jsx'
 
 function Portfolio() {
   return (
-    <div>
+    <div>  
       <ScrollExpandMedia
                 mediaType="video"
                 mediaSrc="vid.mp4"
