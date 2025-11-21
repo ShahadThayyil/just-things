@@ -5,6 +5,10 @@ import FeaturedProjects from '../components/FeaturedProjects'
 import AboutUs from '../components/AboutUS'
 import ServicesSection from '../components/ServiceSection'
 import OnePhotoSection from '../components/OnePhotoSection'
+import TestimonialsSection from '../components/Testimonials'
+import InstagramFeed from '../components/InstaFeed'
+import CallToAction from '../components/CallToAction'
+import Footer from '../components/Footer'
 
 const Home = () => {
   return (
@@ -15,6 +19,10 @@ const Home = () => {
         <AboutUs/>
         <ServicesSection />
         <OnePhotoSection />
+        <TestimonialsSection/>
+        <InstagramFeed />
+        <CallToAction />
+        <Footer />
     </div>
   )
 }

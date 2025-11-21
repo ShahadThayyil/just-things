@@ -9,25 +9,25 @@ const services = [
   {
     title: "Cinematic Edits",
     icon: <Clapperboard size={20} />,
-    img: "https://images.unsplash.com/photo-1536240478700-b869070f9279?q=80&w=1000&auto=format&fit=crop",
+    img: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?q=80&w=1000&auto=format&fit=crop",
     desc: "Storytelling",
   },
   {
     title: "Retouching",
     icon: <Wand2 size={20} />,
-    img: "https://images.unsplash.com/photo-1620406664202-6e993c550d22?q=80&w=1000&auto=format&fit=crop",
+    img: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?q=80&w=1000&auto=format&fit=crop",
     desc: "High-end Skin",
   },
   {
     title: "Drone Shots",
     icon: <Plane size={20} />,
-    img: "https://images.unsplash.com/photo-1473968512647-3e447244af8f?q=80&w=1000&auto=format&fit=crop",
+    img: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?q=80&w=1000&auto=format&fit=crop",
     desc: "Sky Visuals",
   },
   {
     title: "Night Mode",
     icon: <Moon size={20} />,
-    img: "https://images.unsplash.com/photo-1516893842880-5d8aafa7cc4a?q=80&w=1000&auto=format&fit=crop",
+    img: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?q=80&w=1000&auto=format&fit=crop",
     desc: "Low Light",
   },
   {

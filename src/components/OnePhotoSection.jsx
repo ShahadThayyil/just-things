@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import * as THREE from "three"; // Importing only native Three.js
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -10,11 +11,111 @@ const ExpandableSection = () => {
   const imageContainerRef = useRef(null);
   const textRef = useRef(null);
   
-  // Using state to handle initial responsive sizing safely
+  // Ref for the Rain Canvas Container
+  const rainContainerRef = useRef(null);
+  
   const [isMobile, setIsMobile] = useState(false);
 
+  // --- 1. THREE.JS RAIN LOGIC (No Fiber/Drei) ---
   useEffect(() => {
-    // Check initial screen size for initial layout
+    if (!rainContainerRef.current) return;
+
+    // A. Setup Scene, Camera, Renderer
+    const scene = new THREE.Scene();
+    // Fog for depth (Optional, makes rain fade in distance)
+    scene.fog = new THREE.FogExp2(0x000000, 0.002);
+
+    const width = rainContainerRef.current.clientWidth;
+    const height = rainContainerRef.current.clientHeight;
+
+    const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
+    camera.position.z = 10; // Position camera back so we can see the rain
+
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    renderer.setSize(width, height);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    
+    // Append Canvas to the container
+    rainContainerRef.current.appendChild(renderer.domElement);
+
+    // B. Create Rain Particles
+    const particlesGeometry = new THREE.BufferGeometry();
+    const particlesCount = 1500; // Number of drops
+
+    const posArray = new Float32Array(particlesCount * 3); // x, y, z
+
+    for(let i = 0; i < particlesCount * 3; i++) {
+        // Spread particles randomly
+        posArray[i] = (Math.random() - 0.5) * 30; 
+    }
+
+    particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+
+    // Rain Material (Simple lines/dots)
+    const material = new THREE.PointsMaterial({
+        size: 0.08,
+        color: 0xaaaaaa,
+        transparent: true,
+        opacity: 0.8,
+    });
+
+    const particlesMesh = new THREE.Points(particlesGeometry, material);
+    scene.add(particlesMesh);
+
+    // C. Animation Loop
+    let animationId;
+    const animate = () => {
+        animationId = requestAnimationFrame(animate);
+
+        const positions = particlesGeometry.attributes.position.array;
+
+        for(let i = 1; i < particlesCount * 3; i+=3) {
+            // Move Y position down (Gravity)
+            positions[i] -= 0.2;
+
+            // If drop goes below screen (-15), reset to top (15)
+            if (positions[i] < -15) {
+                positions[i] = 15;
+            }
+        }
+        
+        particlesGeometry.attributes.position.needsUpdate = true;
+        renderer.render(scene, camera);
+    };
+
+    animate();
+
+    // D. Handle Resize
+    const handleResize = () => {
+        if (!rainContainerRef.current) return;
+        const newWidth = rainContainerRef.current.clientWidth;
+        const newHeight = rainContainerRef.current.clientHeight;
+        
+        camera.aspect = newWidth / newHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(newWidth, newHeight);
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    // E. Cleanup
+    return () => {
+        window.removeEventListener('resize', handleResize);
+        cancelAnimationFrame(animationId);
+        // Check if child exists before removing to prevent React StrictMode errors
+        if (rainContainerRef.current && rainContainerRef.current.contains(renderer.domElement)) {
+            rainContainerRef.current.removeChild(renderer.domElement);
+        }
+        // Dispose Three.js resources to prevent memory leaks
+        particlesGeometry.dispose();
+        material.dispose();
+        renderer.dispose();
+    };
+  }, []);
+
+
+  // --- 2. GSAP SCROLL LOGIC ---
+  useEffect(() => {
     setIsMobile(window.innerWidth < 768);
 
     const wrapper = wrapperRef.current;
@@ -23,7 +124,6 @@ const ExpandableSection = () => {
     const text = textRef.current;
 
     let ctx = gsap.context(() => {
-      
       let mm = gsap.matchMedia();
 
       mm.add({
@@ -43,17 +143,16 @@ const ExpandableSection = () => {
           }
         });
 
-        // 1. Text Fades Out
+        // Text Fades Out
         tl.to(text, {
           opacity: 0,
-          // Move left on desktop, move up slightly on mobile
           x: isDesktop ? -100 : 0, 
           y: isDesktop ? 0 : -50,
           duration: 0.5,
           ease: "power2.inOut"
         }, 0);
 
-        // 2. Image Expands
+        // Image Expands
         tl.to(imageContainer, {
           width: "100%",
           height: "100%",
@@ -62,7 +161,6 @@ const ExpandableSection = () => {
           ease: "none"
         }, 0);
       });
-
     }, wrapperRef);
 
     return () => ctx.revert();
@@ -71,80 +169,83 @@ const ExpandableSection = () => {
   return (
     <div className="bg-[#0a0a0a] text-white">
       
-      {/* 1. WRAPPER */}
-      <div ref={wrapperRef} className="relative h-[250vh]">
+      {/* WRAPPER */}
+      <div ref={wrapperRef} className="relative h-[250vh] bg-[#0a0a0a]">
         
-        {/* 2. PINNED CONTAINER */}
-        <div ref={containerRef} className="h-screen w-full overflow-hidden relative flex flex-col md:flex-row">
+        {/* PINNED CONTAINER */}
+        <div ref={containerRef} className="h-[100dvh] w-full overflow-hidden relative flex flex-col md:flex-row bg-[#0a0a0a]">
           
-          {/* LEFT SIDE: Content (Text styled like Roel) */}
+          {/* LEFT/TOP SIDE: Content */}
           <div 
             ref={textRef} 
-            className="w-full md:w-1/2 h-1/2 md:h-full flex flex-col justify-center px-6 md:pl-20 md:pr-10 z-10 pt-10 md:pt-0"
+            className="w-full  md:w-1/2 h-[8000px] md:h-full flex flex-col justify-center px-6 md:pl-20 md:pr-10 z-10 relative overflow-hidden"
           >
-            {/* Small Logo Placeholder */}
-            <div className="mb-8">
-                 <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-white opacity-80 animate-pulse">
-                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-                 </svg>
-            </div>
+             {/* --- THREE.JS RAIN CONTAINER --- */}
+             {/* This div will hold the canvas injected by the useEffect */}
+             <div ref={rainContainerRef} className="absolute inset-0 z-0 pointer-events-none opacity-50"></div>
+             {/* Overlay gradient to ensure text readability over rain */}
+             <div className="absolute inset-0 z-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-[#0a0a0a]"></div>
 
-            {/* THE BIG BOLD TEXT */}
-            <h1 className="text-5xl md:text-7xl lg:text-8xl font-black uppercase leading-[0.9] tracking-tighter mb-8 text-left">
-              OOPS, I JUST <br />
-              WANT TO SHOW <br />
-              ONE MORE <br />
-              STUNNING <br />
-              PICTURE
-            </h1>
-            
-            {/* Body Text */}
-            <p className="text-gray-400 text-sm md:text-base leading-relaxed max-w-md text-left font-medium">
-              For me, every photo is truly special... It captures a moment that eyes cannot freeze. When a photo touches me, I want it to touch you too.
-            </p>
+
+            {/* TEXT CONTENT (z-10 to sit above rain) */}
+            <div className="relative z-10">
+                {/* Small Logo */}
+                <div className="mb-4 md:mb-8">
+                    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-white opacity-80 animate-pulse">
+                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                    </svg>
+                </div>
+
+                {/* BIG BOLD TEXT */}
+                <h1 className="text-4xl md:text-7xl lg:text-6xl font-black uppercase leading-[0.9] tracking-tighter mb-4 md:mb-8 text-left drop-shadow-xl">
+                OOPS, I JUST <br />
+                WANT TO SHOW <br />
+                ONE MORE <br />
+                STUNNING <br />
+                PICTURE
+                </h1>
+                
+                {/* Body Text */}
+                <p className="text-gray-300 text-xs md:text-base leading-relaxed max-w-md text-left font-medium drop-shadow-md">
+                For me, every photo is truly special... It captures a moment that eyes cannot freeze. When a photo touches me, I want it to touch you too.
+                </p>
+            </div>
           </div>
 
-          {/* RIGHT SIDE: Image Container with FENCE OVERLAY */}
+          {/* RIGHT/BOTTOM SIDE: Image Container */}
           <div 
             ref={imageContainerRef}
             className="absolute bg-gray-800 z-20 overflow-hidden border-l-0 md:border-l-4 border-t-4 md:border-t-0 border-[#0a0a0a]"
-            // Initial sizing based on state
             style={{
               width: isMobile ? '100%' : '50%', 
               height: isMobile ? '50%' : '100%',
               right: 0,
               bottom: 0,
-              top: isMobile ? 'auto' : 0
+              top: isMobile ? 'auto' : 0 
             }}
           >
             <img
-              // Using the concert image from the reference to match the vibe
               src="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=2070&auto=format&fit=crop"
               alt="Concert Crowd"
               className="w-full h-full object-cover"
             />
             
-            {/* --- THE BLACK DIAMOND FENCE OVERLAY --- */}
+            {/* FENCE OVERLAY */}
             <div 
                 className="absolute inset-0 z-30 pointer-events-none"
                 style={{
-                  // CSS Gradients to create thick black cross lines
                   background: `
                     repeating-linear-gradient(45deg, #0a0a0a, #0a0a0a 8px, transparent 8px, transparent 120px),
                     repeating-linear-gradient(-45deg, #0a0a0a, #0a0a0a 8px, transparent 8px, transparent 120px)
                   `
                 }}
             ></div>
-             {/* A subtle bottom gradient fade for better blending */}
              <div className="absolute bottom-0 left-0 w-full h-40 bg-gradient-to-t from-[#0a0a0a] to-transparent z-30"></div>
 
           </div>
 
         </div>
       </div>
-
-     
-
     </div>
   );
 };
