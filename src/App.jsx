@@ -1,11 +1,13 @@
 import React, { useEffect } from 'react';
 import Navbar from './components/NavbarSection.jsx';
+import Footer from './components/Footer.jsx';
 import Home from './pages/Home.jsx';
 import Lenis from 'lenis';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Portfolio from './pages/Portfolio.jsx';
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
+import Service from './pages/Services.jsx';
 
 // Register ScrollTrigger globally
 gsap.registerPlugin(ScrollTrigger);
@@ -48,8 +50,10 @@ function App() {
             path="/Portfolio"
             element={<Portfolio />}
           />
+          <Route path="/services" element={<Service />} />
         </Routes>
       </Router>
+      <Footer />
     </div>
   );
 }

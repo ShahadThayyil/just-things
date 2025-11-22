@@ -156,20 +156,11 @@ export default function FeaturedProjects() {
                 </motion.div>
             </div>
 
-            {/* 3. Button (Fixed at Bottom inside Sticky) */}
-            <div className="w-full px-6 pb-8 pt-4 bg-[#0A0A0A] z-10">
-                 <button className="w-full py-4 bg-[#00D2BE] text-black font-bold tracking-widest uppercase text-sm rounded-full shadow-lg shadow-[#00D2BE]/20 active:scale-95 transition-transform">
-                    View All Projects
-                </button>
-            </div>
+            {/* Button REMOVED here */}
 
           </div>
         </div>
       </div>
-
-      {/* --- NEXT SECTION (Just for testing) --- */}
-    
-
     </div>
   );
 }
