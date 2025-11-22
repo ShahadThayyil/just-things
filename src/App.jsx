@@ -8,6 +8,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Portfolio from './pages/Portfolio.jsx';
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import Service from './pages/Services.jsx';
+import AboutPage from './pages/About.jsx';
 
 // Register ScrollTrigger globally
 gsap.registerPlugin(ScrollTrigger);
@@ -51,6 +52,7 @@ function App() {
             element={<Portfolio />}
           />
           <Route path="/services" element={<Service />} />
+          <Route path="/about" element={<AboutPage />} />
         </Routes>
       </Router>
       <Footer />
