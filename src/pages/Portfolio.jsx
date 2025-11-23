@@ -4,32 +4,38 @@ import PortfolioScroll from "../components/PortfolioScroll";
 import { FullScreenScrollFX } from "../components/FullScreenScrollFX";
 
 // Data for the DemoOne / FullScreenScrollFX component
-const fxSections = [
+const sections = [
   {
-    background: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=1920",
-    title: "Digital Ecosystems",
-    leftLabel: "01. Strategy",
-    rightLabel: "React / Node",
+    leftLabel: "Silence",
+    title: <>Absence</>,
+    rightLabel: "Silence",
+    background: "https://images.pexels.com/photos/3289156/pexels-photo-3289156.jpeg?cs=srgb&dl=pexels-alexfu-3289156.jpg&fm=jpg&_gl=1*1acr8i7*_ga*MTI3MjA2NDU0Mi4xNzU1NzM3ODI5*_ga_8JE65Q40S6*czE3NTU3NjkyMzgkbzMkZzEkdDE3NTU3Njk1MTckajYwJGwwJGgw",
+    audioSrc: "/sfx/click-01.mp3",
   },
   {
-    background: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=1920",
-    title: "Cyber Security",
-    leftLabel: "02. Protection",
-    rightLabel: "Python / Go",
+    leftLabel: "Essence",
+    title: <>Stillness</>,
+    rightLabel: "Essence",
+    background: "https://images.pexels.com/photos/163790/at-night-under-a-lantern-guy-night-city-163790.jpeg",
+    audioSrc: "/sfx/whoosh-02.mp3",
   },
   {
-    background: "https://images.unsplash.com/photo-1519638399535-1b036603ac77?auto=format&fit=crop&q=80&w=1920",
-    title: "Data Visualization",
-    leftLabel: "03. Analytics",
-    rightLabel: "D3 / WebGL",
+    leftLabel: "Rebirth",
+    title: <>Growth</>,
+    rightLabel: "Rebirth",
+    background: "https://images.pexels.com/photos/9817/pexels-photo-9817.jpeg",
+    audioSrc: "/sfx/whoosh-02.mp3",
   },
   {
-    background: "https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?auto=format&fit=crop&q=80&w=1920",
-    title: "Cloud Infrastructure",
-    leftLabel: "04. Scale",
-    rightLabel: "AWS / Docker",
+    leftLabel: "Change",
+    title: <>Opportunity</>,
+    rightLabel: "Change",
+    background: "https://images.pexels.com/photos/939807/pexels-photo-939807.jpeg",
+    audioSrc: "/sfx/whoosh-02.mp3",
   },
+  // ...
 ];
+
 
 export default function Portfolio() {
   return (
@@ -70,17 +76,11 @@ export default function Portfolio() {
       {/* 3. DemoOne (Full Screen FX) Section */}
       <div className="relative z-10">
         <FullScreenScrollFX
-          sections={fxSections}
-          header={
-            <div className="text-white text-xl font-bold tracking-tighter">
-              AGENCY<span className="text-blue-500">.IO</span>
-            </div>
-          }
-          footer={
-            <div className="text-gray-400 text-sm">
-              © 2025 All Rights Reserved.
-            </div>
-          }
+          sections={sections}
+          header={<><div>The Creative</div><div>Process</div></>}
+          footer={<div></div>}
+          showProgress
+          durations={{ change: 0.7, snap: 800 }}
         />
       </div>
     </div>
