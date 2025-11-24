@@ -1,352 +1,351 @@
-import React, { useRef } from "react";
+import React, { useRef, useState, useLayoutEffect } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
-import { clsx } from "clsx";
-import { twMerge } from "tailwind-merge";
+import {
+  Camera,
+  Car,
+  Utensils,
+  Clapperboard,
+  Calendar,
+  X
+} from "lucide-react";
 
-// --- UTILS ---
-function cn(...inputs) {
-  return twMerge(clsx(inputs));
-}
-
-// --- IMAGE (DO NOT CHANGE) ---
-import lensImg from "/cam_img.png"; 
+// --- IMAGE ---
+import lensImg from "/cam_img.png";
+// Fallback if local image is missing
 const fallbackImg = "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?q=80&w=1000&auto=format&fit=crop";
 
 gsap.registerPlugin(ScrollTrigger);
 
-// --- ORBIT COMPONENT ---
-const OrbitingCircles = ({
-  className,
-  children,
-  reverse,
-  duration = 20,
-  delay = 10,
-  radius = 50,
-  path = true,
-}) => {
+// --- DATA ---
+const SERVICES_DATA = [
+  // INNER RING (2 Items)
+  {
+    id: "wedding",
+    title: "Weddings",
+    ring: "inner",
+    icon: <Camera size={24} />,
+    color: "#ec4899", // Pink
+    items: ["Photography", "Videography", "Candid", "Highlights", "Pre-wedding"]
+  },
+  {
+    id: "monthly",
+    title: "Monthly Pkg",
+    ring: "inner",
+    icon: <Calendar size={24} />,
+    color: "#06b6d4", // Cyan
+    items: ["Content Reels", "Posters", "Social Media", "Page Handling"]
+  },
+  // OUTER RING (3 Items)
+  {
+    id: "food",
+    title: "Food Vlogs",
+    ring: "outer",
+    icon: <Utensils size={24} />,
+    color: "#f59e0b", // Amber
+    items: ["Food Photos", "Reels", "Creative Videos", "Transitions"]
+  },
+  {
+    id: "automotive",
+    title: "Automotive",
+    ring: "outer",
+    icon: <Car size={24} />,
+    color: "#ef4444", // Red
+    items: ["Revealing", "On-road", "Off-roading", "Cinematic"]
+  },
+  {
+    id: "production",
+    title: "Production",
+    ring: "outer",
+    icon: <Clapperboard size={24} />,
+    color: "#8b5cf6", // Violet
+    items: ["Perfumes", "Cosmetics", "Jewelry", "Commercials"]
+  }
+];
+
+// --- POPUP CARD ---
+const ServicePopup = ({ activeService, onClose }) => {
+  const containerRef = useRef(null);
+  const contentRef = useRef(null);
+
+  useGSAP(() => {
+    if (!activeService) return;
+
+    const tl = gsap.timeline();
+
+    tl.fromTo(containerRef.current,
+      { opacity: 0, scale: 0.8 },
+      { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.7)" }
+    )
+      .fromTo(contentRef.current.children,
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, stagger: 0.1, duration: 0.4 },
+        "-=0.3"
+      );
+
+  }, { dependencies: [activeService] });
+
+  if (!activeService) return null;
+
   return (
-    <>
-      {path && (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          version="1.1"
-          className="pointer-events-none absolute inset-0 size-full"
-        >
-          <circle
-            className="stroke-white/10 stroke-1" 
-            cx="50%"
-            cy="50%"
-            r={radius}
-            fill="none"
-          />
-        </svg>
-      )}
+    <div className="fixed inset-0 z-[60] flex items-center justify-center px-4">
+      <div
+        className="absolute inset-0 bg-black/60 backdrop-blur-md"
+        onClick={onClose}
+      />
 
       <div
-        style={{
-          "--duration": duration,
-          "--radius": radius,
-          "--delay": -delay,
-        }}
-        className={cn(
-          "absolute flex transform-gpu animate-orbit items-center justify-center rounded-full [animation-delay:calc(var(--delay)*1000ms)]",
-          { "[animation-direction:reverse]": reverse },
-          className
-        )}
+        ref={containerRef}
+        className="relative w-full max-w-md bg-white/5 border border-white/10 rounded-2xl p-8 shadow-2xl backdrop-blur-xl overflow-hidden"
+        style={{ boxShadow: `0 0 40px ${activeService.color}20` }}
       >
-        {children}
+        {/* Decorative Glow */}
+        <div
+          className="absolute -top-20 -right-20 w-40 h-40 rounded-full blur-[80px] opacity-40 pointer-events-none"
+          style={{ backgroundColor: activeService.color }}
+        />
+        <div
+          className="absolute -bottom-20 -left-20 w-40 h-40 rounded-full blur-[80px] opacity-40 pointer-events-none"
+          style={{ backgroundColor: activeService.color }}
+        />
+
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-white/50 hover:text-white transition-colors"
+        >
+          <X size={24} />
+        </button>
+
+        <div ref={contentRef} className="flex flex-col items-center text-center relative z-10">
+          <div
+            className="p-5 rounded-2xl mb-6 text-white shadow-lg transform transition-transform hover:scale-105"
+            style={{
+              backgroundColor: activeService.color,
+              boxShadow: `0 10px 30px -10px ${activeService.color}`
+            }}
+          >
+            {React.cloneElement(activeService.icon, { size: 32 })}
+          </div>
+
+          <h3 className="text-3xl font-bold text-white mb-2">
+            {activeService.title}
+          </h3>
+
+          <div className="w-12 h-1 rounded-full mb-6 opacity-50" style={{ backgroundColor: activeService.color }} />
+
+          <div className="flex flex-wrap justify-center gap-2 w-full">
+            {activeService.items.map((item, idx) => (
+              <span
+                key={idx}
+                className="text-sm px-4 py-2 rounded-lg text-white/90 bg-white/5 border border-white/10 hover:bg-white/10 transition-colors"
+              >
+                {item}
+              </span>
+            ))}
+          </div>
+        </div>
       </div>
-    </>
+    </div>
   );
 };
 
-// --- UPDATED SERVICES DATA (With Images) ---
-const services = [
-  // Inner Ring
-  { 
-    id: 1, 
-    title: "Weddings", 
-    img: "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=300" 
-  },
-  { 
-    id: 2, 
-    title: "Automotive", 
-    img: "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&q=80&w=300" 
-  },
-  { 
-    id: 3, 
-    title: "Real Estate", 
-    img: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&q=80&w=300" 
-  },
-  // Outer Ring
-  { 
-    id: 4, 
-    title: "Corporate", 
-    img: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=300" 
-  },
-  { 
-    id: 5, 
-    title: "Fashion", 
-    img: "https://images.unsplash.com/photo-1539109136881-3be0616acf4b?auto=format&fit=crop&q=80&w=300" 
-  },
-  { 
-    id: 6, 
-    title: "Food Vlogs", 
-    img: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=300" 
-  },
-];
+// --- ORBIT RING ---
+const OrbitRing = ({ items, radius, duration, reverse, onSelect }) => {
+  return (
+    <div
+      className="orbit-ring-container absolute rounded-full border border-dashed border-white/10 flex items-center justify-center pointer-events-none"
+      style={{
+        width: radius * 2,
+        height: radius * 2,
+        "--duration": `${duration}s`,
+        "--direction": reverse ? 'reverse' : 'normal',
+        "--counter-direction": reverse ? 'normal' : 'reverse'
+      }}
+    >
+      {items.map((item, index) => {
+        const angle = (index / items.length) * 360;
+        // Initial position on the ring
+        const transform = `rotate(${angle}deg) translate(${radius}px) rotate(-${angle}deg)`;
 
+        return (
+          <div
+            key={item.id}
+            className="absolute top-1/2 left-1/2 w-0 h-0 flex items-center justify-center"
+            style={{ transform: transform }}
+          >
+            {/* Counter-rotating container */}
+            <div
+              className="orbit-item flex flex-col items-center justify-center cursor-pointer group pointer-events-auto"
+              onClick={() => onSelect(item)}
+            >
+              {/* Icon Circle */}
+              <div
+                className="w-16 h-16 rounded-full flex items-center justify-center bg-[#0a0a0a] border border-white/10 shadow-lg transition-all duration-300 group-hover:scale-110 group-hover:border-[var(--color)]"
+                style={{
+                  '--color': item.color,
+                  boxShadow: '0 0 20px rgba(0,0,0,0.5)'
+                }}
+              >
+                <div className="text-white/70 group-hover:text-[var(--color)] transition-colors duration-300">
+                  {item.icon}
+                </div>
+              </div>
+
+              {/* Label */}
+              <span
+                className="mt-3 text-[10px] font-bold uppercase tracking-widest text-white/40 bg-black/40 px-3 py-1 rounded-full backdrop-blur-sm border border-white/5 transition-all duration-300 group-hover:text-white group-hover:bg-[var(--color)] group-hover:border-[var(--color)]"
+                style={{ '--color': item.color }}
+              >
+                {item.title}
+              </span>
+
+              {/* Hover Glow Effect via CSS */}
+              <style jsx>{`
+                .group:hover .w-16 {
+                  box-shadow: 0 0 30px var(--color);
+                }
+              `}</style>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
+// --- MAIN COMPONENT ---
 const Service = () => {
   const wrapperRef = useRef(null);
   const cameraRef = useRef(null);
-  const overlayRef = useRef(null);
   const bgTextRef = useRef(null);
   const orbitContainerRef = useRef(null);
+
+  const [activeService, setActiveService] = useState(null);
+
+  const innerItems = SERVICES_DATA.filter(i => i.ring === "inner");
+  const outerItems = SERVICES_DATA.filter(i => i.ring === "outer");
 
   useGSAP(() => {
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: wrapperRef.current,
         start: "top top",
-        end: "+=350%", // Fast zoom
+        end: "+=200%",
         scrub: 1,
         pin: true,
       },
     });
 
-    tl
-    // 1. Zoom
-    .to(cameraRef.current, {
-      scale: 60,
+    // 1. Zoom Camera & Fade Text
+    tl.to(cameraRef.current, {
+      scale: 50,
       rotation: 180,
       duration: 2,
       ease: "power2.inOut",
       transformOrigin: "center center",
     })
-    // 2. Background Text
-    .to(bgTextRef.current, {
-      scale: 5,
-      opacity: 0,
-      duration: 1.5,
-      ease: "power2.in"
-    }, "<")
-    // 3. Dark Overlay
-    .to(overlayRef.current, { opacity: 1, duration: 1.5 }, "<")
-    
-    // 4. Orbit Reveal
-    .to(orbitContainerRef.current, {
-      opacity: 1,
-      scale: 1,
-      duration: 1,
-      ease: "power2.out"
-    }, "-=1");
+      .to(bgTextRef.current, {
+        opacity: 0,
+        scale: 1.5,
+        duration: 1
+      }, "<")
+
+      // 2. Hide Camera & Reveal Orbit System
+      .to(cameraRef.current, {
+        autoAlpha: 0,
+        duration: 0.1
+      }, ">-0.5")
+      .fromTo(orbitContainerRef.current,
+        { scale: 0.5, autoAlpha: 0 },
+        { scale: 1, autoAlpha: 1, duration: 1, ease: "power2.out" }
+      );
 
   }, { scope: wrapperRef });
 
   return (
-    <section ref={wrapperRef} className="service-section-wrapper">
-      
+    <section ref={wrapperRef} className="relative w-full h-screen bg-[#050505] overflow-hidden flex items-center justify-center font-['Inter',sans-serif]">
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
 
-        .service-section-wrapper {
-          position: relative;
-          width: 100%;
-          height: 100vh;
-          background-color: #050505;
-          overflow: hidden;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          font-family: 'Inter', sans-serif;
-          z-index: 1; 
+        /* --- ROTATION ANIMATIONS --- */
+        @keyframes rotate-ring {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
         }
 
-        /* ANIMATION */
-        @keyframes orbit {
-          0% { transform: rotate(0deg) translateY(calc(var(--radius) * 1px)) rotate(0deg); }
-          100% { transform: rotate(360deg) translateY(calc(var(--radius) * 1px)) rotate(-360deg); }
+        .orbit-ring-container {
+          animation: rotate-ring var(--duration) linear infinite var(--direction);
         }
-        .animate-orbit { animation: orbit calc(var(--duration)*1s) linear infinite; }
-
-        /* TYPOGRAPHY */
-        .bg-text-container {
-          position: absolute; width: 100%; height: 100%;
-          display: flex; justify-content: center; align-items: center; pointer-events: none;
-        }
-        .bg-text {
-          font-size: 18vw; font-weight: 800; color: rgba(255, 255, 255, 0.05);
-          text-transform: uppercase; letter-spacing: -5px; line-height: 0.8; text-align: center;
+        
+        /* Counter-rotate items so they stand still vertically */
+        .orbit-item {
+          animation: rotate-ring var(--duration) linear infinite var(--counter-direction);
         }
 
-        /* LENS OVERLAY */
-        .lens-overlay {
-          position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-          background: #000; opacity: 0; z-index: 5; pointer-events: none;
-        }
-        .camera-container {
-          position: relative; width: 100%; height: 100%;
-          display: flex; justify-content: center; align-items: center; z-index: 2; 
-        }
-        .camera-img {
-          width: 650px; height: 650px; object-fit: contain;
-          filter: drop-shadow(0 20px 50px rgba(0,0,0,0.9));
-          will-change: transform;
-        }
-
-        /* ORBIT CONTAINER */
-        .orbit-system-wrapper {
-          position: absolute; width: 100%; height: 100%; top: 0; left: 0;
-          display: flex; justify-content: center; align-items: center;
-          z-index: 10; opacity: 0; transform: scale(0.8);
-        }
-
-        /* --- MODERN ROUND CARD STYLES --- */
-        .orbit-card {
-            position: relative;
-            width: 110px;
-            height: 110px;
-            border-radius: 50%;
-            overflow: hidden;
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            cursor: pointer;
-            transition: transform 0.3s ease, border-color 0.3s;
-        }
-        .orbit-card img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.5s;
-        }
-        /* Dark gradient overlay so text is visible */
-        .orbit-card-overlay {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(to top, rgba(0,0,0,0.9), rgba(0,0,0,0.1));
-            display: flex;
-            align-items: flex-end;
-            justify-content: center;
-            padding-bottom: 15px;
-        }
-        .orbit-title {
-            font-size: 10px;
-            font-weight: 600;
-            color: white;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            z-index: 2;
-        }
-
-        /* HOVER EFFECTS */
-        .orbit-card:hover {
-            transform: scale(1.2);
-            border-color: #00d2ff;
-            z-index: 20;
-        }
-        .orbit-card:hover img {
-            transform: scale(1.1);
-        }
-
-        /* CORNER INFO */
-        .corner-info {
-          position: absolute; color: #666; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; z-index: 4; 
-        }
-        .top-left { top: 40px; left: 40px; }
-        .top-right { top: 40px; right: 40px; text-align: right; }
-        .bottom-center { bottom: 40px; animation: bounce 2s infinite; }
-        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(10px); } }
-
-        /* MOBILE */
-        @media (max-width: 768px) {
-          .camera-img { width: 350px; height: 350px; }
-          .bg-text { font-size: 25vw; }
-          .orbit-card { width: 80px; height: 80px; }
-          .orbit-title { font-size: 8px; padding-bottom: 10px; }
+        /* --- HOVER PAUSE LOGIC --- */
+        .orbit-ring-container:hover,
+        .orbit-item:hover {
+          animation-play-state: paused;
         }
       `}</style>
 
-      <div ref={bgTextRef} className="bg-text-container">
-         <h1 className="bg-text">OUR<br/>SERVICES</h1>
+      {/* BACKGROUND TEXT */}
+      <div ref={bgTextRef} className="absolute inset-0 flex items-center justify-center pointer-events-none select-none">
+        <h1 className="text-[15vw] font-black text-white/5 uppercase tracking-tighter leading-[0.8] text-center">
+          VYNX<br />WEBWORKS
+        </h1>
       </div>
 
-      <div className="corner-info top-left">VYNX WEBWORKS ®</div>
-      <div className="corner-info top-right">EST. 2025<br/>KERALA, INDIA</div>
-      <div className="corner-info bottom-center">SCROLL TO ZOOM</div>
-
-      <div ref={overlayRef} className="lens-overlay"></div>
-
-      <div className="camera-container">
-          <img 
-              ref={cameraRef} 
-              src={lensImg || fallbackImg} 
-              alt="Camera Lens" 
-              className="camera-img" 
-          />
+      {/* CAMERA LENS */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+        <img
+          ref={cameraRef}
+          src={lensImg || fallbackImg}
+          alt="Camera Lens"
+          className="w-[600px] h-[600px] object-contain drop-shadow-2xl"
+        />
       </div>
 
       {/* ORBIT SYSTEM */}
-      <div ref={orbitContainerRef} className="orbit-system-wrapper">
-          <div className="relative flex h-[600px] w-full flex-col items-center justify-center">
-            
-            {/* INNER RING (Radius 140) */}
-            <OrbitingCircles radius={140} duration={20} delay={0} className="border-none bg-transparent">
-                <div className="orbit-card">
-                    <img src={services[0].img} alt={services[0].title} />
-                    <div className="orbit-card-overlay">
-                        <span className="orbit-title">{services[0].title}</span>
-                    </div>
-                </div>
-            </OrbitingCircles>
-            <OrbitingCircles radius={140} duration={20} delay={6.6} className="border-none bg-transparent">
-                <div className="orbit-card">
-                    <img src={services[1].img} alt={services[1].title} />
-                     <div className="orbit-card-overlay">
-                        <span className="orbit-title">{services[1].title}</span>
-                    </div>
-                </div>
-            </OrbitingCircles>
-            <OrbitingCircles radius={140} duration={20} delay={13.3} className="border-none bg-transparent">
-                <div className="orbit-card">
-                    <img src={services[2].img} alt={services[2].title} />
-                     <div className="orbit-card-overlay">
-                        <span className="orbit-title">{services[2].title}</span>
-                    </div>
-                </div>
-            </OrbitingCircles>
+      <div
+        ref={orbitContainerRef}
+        className="orbit-system relative w-full h-full flex items-center justify-center opacity-0 z-20"
+      >
+        {/* Modal */}
+        <ServicePopup
+          activeService={activeService}
+          onClose={() => setActiveService(null)}
+        />
 
-
-            {/* OUTER RING (Radius 260) - Reverse Direction */}
-            <OrbitingCircles radius={260} duration={30} delay={0} reverse className="border-none bg-transparent">
-                <div className="orbit-card">
-                    <img src={services[3].img} alt={services[3].title} />
-                     <div className="orbit-card-overlay">
-                        <span className="orbit-title">{services[3].title}</span>
-                    </div>
-                </div>
-            </OrbitingCircles>
-            <OrbitingCircles radius={260} duration={30} delay={10} reverse className="border-none bg-transparent">
-                 <div className="orbit-card">
-                    <img src={services[4].img} alt={services[4].title} />
-                     <div className="orbit-card-overlay">
-                        <span className="orbit-title">{services[4].title}</span>
-                    </div>
-                </div>
-            </OrbitingCircles>
-            <OrbitingCircles radius={260} duration={30} delay={20} reverse className="border-none bg-transparent">
-                 <div className="orbit-card">
-                    <img src={services[5].img} alt={services[5].title} />
-                     <div className="orbit-card-overlay">
-                        <span className="orbit-title">{services[5].title}</span>
-                    </div>
-                </div>
-            </OrbitingCircles>
-
+        {/* Rings Container - Fades out when modal is active */}
+        <div
+          className={`relative w-full h-full flex items-center justify-center transition-all duration-500 ${activeService ? 'opacity-0 scale-90 pointer-events-none' : 'opacity-100 scale-100'}`}
+        >
+          {/* Center Branding */}
+          <div className="absolute z-0 text-center opacity-20 pointer-events-none">
+            <h2 className="text-5xl font-black text-white tracking-tighter">VYNX</h2>
           </div>
-      </div>
 
+          {/* INNER RING - Clockwise */}
+          <OrbitRing
+            items={innerItems}
+            radius={140}
+            duration={25}
+            reverse={false}
+            onSelect={setActiveService}
+          />
+
+          {/* OUTER RING - Counter-Clockwise */}
+          <OrbitRing
+            items={outerItems}
+            radius={250}
+            duration={40}
+            reverse={true}
+            onSelect={setActiveService}
+          />
+        </div>
+      </div>
     </section>
   );
 };
