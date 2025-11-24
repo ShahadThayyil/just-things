@@ -1,305 +1,259 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
-import { ArrowDown, Instagram, Twitter, Linkedin, Mail, ArrowUpRight, Hexagon, Lock, Unlock, Aperture } from 'lucide-react';
+// src/pages/PhotographerAboutPage.jsx
+import React, { useLayoutEffect, useRef } from 'react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
 
 const AboutPage = () => {
-  // --- 1. Custom Cursor Logic ---
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const [hovered, setHovered] = useState(false);
-  
-  useEffect(() => {
-    const mouseMove = (e) => setMousePosition({ x: e.clientX, y: e.clientY });
-    window.addEventListener("mousemove", mouseMove);
-    return () => window.removeEventListener("mousemove", mouseMove);
-  }, []);
+    const mainContainerRef = useRef(null);
+    const heroTextRef = useRef(null);
+    const heroImageBgRef = useRef(null);
+    const bioRef = useRef(null);
+    const focusAreasRef = useRef(null);
+    const timelineRef = useRef(null);
 
-  const cursorVariants = {
-    default: { x: mousePosition.x - 12, y: mousePosition.y - 12, scale: 1 },
-    hover: { x: mousePosition.x - 32, y: mousePosition.y - 32, height: 64, width: 64, mixBlendMode: "difference", backgroundColor: "white" }
-  };
+    useLayoutEffect(() => {
+        let ctx = gsap.context(() => {
 
-  // --- 2. Scroll Animations (The Timeline) ---
-  // We track the progress of the HERO container specifically
-  const heroRef = useRef(null); 
-  const { scrollYProgress } = useScroll({ 
-    target: heroRef,
-    offset: ["start start", "end start"] // 0% is start of page, 100% is end of hero
-  });
+            // --- 1. Hero Animation ---
+            const tl = gsap.timeline({ defaults: { ease: "power4.out" } });
 
-  // --- TIMELINE CONFIGURATION ---
-  // 0%   -> 60% : Loading (Text Fixed, Lock Fills)
-  // 60%  -> 70% : Unlocked (Green Color, Lock Icon Changes)
-  // 70%  -> 80% : VIBRATION (Chaos)
-  // 80%  -> 100%: SPLIT (Text flies apart, Lock vanishes)
-
-  // 1. LOCK MECHANISM (0 - 60%)
-  const pathLength = useTransform(scrollYProgress, [0, 0.6], [0, 1]);
-  const ringColor = useTransform(scrollYProgress, [0, 0.6], ["#06b6d4", "#22c55e"]);
-  const lockScale = useTransform(scrollYProgress, [0, 0.6], [1, 0.9]); // Slight shrink on focus
-  
-  // Icon Switch (Happens precisely at 60%)
-  const closedLockOpacity = useTransform(scrollYProgress, [0.59, 0.6], [1, 0]);
-  const openLockOpacity = useTransform(scrollYProgress, [0.59, 0.6], [0, 1]);
-  
-  // Text Status (Focusing -> Unlocked)
-  const loadingTextOpacity = useTransform(scrollYProgress, [0, 0.55], [1, 0]);
-  const successTextOpacity = useTransform(scrollYProgress, [0.6, 0.65], [0, 1]);
+            tl.fromTo(heroImageBgRef.current,
+                { scale: 1.1, opacity: 0 },
+                { scale: 1, opacity: 0.4, duration: 2 }
+            )
+                .fromTo(heroTextRef.current.children,
+                    { y: 100, opacity: 0, skewY: 5 },
+                    { y: 0, opacity: 1, skewY: 0, stagger: 0.15, duration: 1.2 },
+                    "-=1.5"
+                );
 
 
-  // 2. VIBRATION (70% - 80%)
-  // Notice: Input starts at 0.7, so before that, it is 0 (Fixed)
-  const shakeX = useTransform(scrollYProgress, 
-    [0, 0.7, 0.72, 0.74, 0.76, 0.78, 0.8], 
-    ["0px", "0px", "5px", "-5px", "10px", "-10px", "0px"]
-  );
-  const shakeY = useTransform(scrollYProgress, 
-    [0, 0.7, 0.72, 0.74, 0.76, 0.78, 0.8], 
-    ["0px", "0px", "-5px", "5px", "-10px", "10px", "0px"]
-  );
+            // --- 2. Bio Section Trigger ---
+            gsap.fromTo(bioRef.current.children,
+                { y: 50, opacity: 0 },
+                {
+                    y: 0,
+                    opacity: 1,
+                    stagger: 0.2,
+                    duration: 1,
+                    ease: "power2.out",
+                    scrollTrigger: {
+                        trigger: bioRef.current,
+                        start: "top 80%",
+                    }
+                }
+            );
+
+            // --- 3. Focus Areas Stagger ---
+            const focusItems = gsap.utils.toArray('.focus-item', focusAreasRef.current);
+            gsap.fromTo(focusItems,
+                { y: 50, opacity: 0 },
+                {
+                    y: 0,
+                    opacity: 1,
+                    stagger: 0.15,
+                    duration: 0.8,
+                    ease: "back.out(1.5)",
+                    scrollTrigger: {
+                        trigger: focusAreasRef.current,
+                        start: "top 85%",
+                    }
+                }
+            );
+
+            // --- 4. Timeline/Exhibits Trigger ---
+            const timelineItems = gsap.utils.toArray('.timeline-item', timelineRef.current);
+            timelineItems.forEach((item, index) => {
+                gsap.fromTo(item,
+                    { x: index % 2 === 0 ? -100 : 100, opacity: 0 },
+                    {
+                        x: 0,
+                        opacity: 1,
+                        duration: 1,
+                        ease: "power3.out",
+                        scrollTrigger: {
+                            trigger: item,
+                            start: "top 85%",
+                        }
+                    }
+                )
+            });
+
+        }, mainContainerRef);
+        return () => ctx.revert();
+    }, []);
 
 
-  // 3. THE SPLIT (80% - 100%)
-  // Before 0.8, the value is "0%", so the text is perfectly fixed.
-  const splitUp = useTransform(scrollYProgress, [0.8, 1], ["0%", "-150%"]); 
-  const splitDown = useTransform(scrollYProgress, [0.8, 1], ["0%", "150%"]);
-  
-  const splitRotateLeft = useTransform(scrollYProgress, [0.8, 1], [0, -15]);
-  const splitRotateRight = useTransform(scrollYProgress, [0.8, 1], [0, 15]);
+    // Data needed for the sections
+    const focusAreas = [
+        { title: "Urban Street", desc: "Capturing the raw energy and candid moments of city life in monochrome." },
+        { title: "Neo-Noir Portraiture", desc: "High-contrast, moody portraiture utilizing available artificial light." },
+        { title: "Architecture", desc: "Finding geometry and stark contrast in modern and brutalist structures." },
+        { title: "Nightscapes", desc: "Long exposures synthesizing movement and static neon light." },
+    ];
+
+    const timelineData = [
+        { year: "2024", title: "Solo Exhibition: 'Neon Shadows'", location: "Apex Gallery, NY", description: "A 30-piece collection exploring isolation in the hyper-connected city." },
+        { year: "2022", title: "Featured: Monochrome Magazine", location: "Print Issue #45", description: "Cover feature and 8-page spread on minimalist architectural photography." },
+        { year: "2019", title: "Award: LensCulture Street", location: "International", description: "Finalist in the annual street photography awards for the 'Transit' series." },
+    ];
 
 
-  // 4. CLEANUP (Removing elements before next section)
-  // The Lock must disappear AS the split starts, so it's gone by the time we scroll past
-  const lockContainerOpacity = useTransform(scrollYProgress, [0.75, 0.85], [1, 0]);
-  
-  // The Hero container fades out at the very end to avoid overlap
-  const heroContainerOpacity = useTransform(scrollYProgress, [0.95, 1], [1, 0]);
-
-
-  return (
-    <div className="bg-[#050505] text-[#e0e0e0] min-h-screen cursor-none font-sans selection:bg-cyan-500 selection:text-black overflow-x-hidden perspective-1000">
-      
-      {/* Custom Cursor */}
-      <motion.div 
-        variants={cursorVariants}
-        animate={hovered ? "hover" : "default"}
-        transition={{ type: "tween", ease: "backOut", duration: 0.1 }}
-        className="fixed top-0 left-0 w-6 h-6 border border-white rounded-full pointer-events-none z-50 flex items-center justify-center mix-blend-difference"
-      >
-        {!hovered && <div className="w-1 h-1 bg-white rounded-full" />}
-        {hovered && <ArrowUpRight className="text-black w-6 h-6" />}
-      </motion.div>
-
-      {/* --- SECTION 1: HERO (Timeline Controller) --- */}
-      {/* 400vh height ensures we have enough scroll room to finish animations */}
-      <section ref={heroRef} className="relative h-[400vh] border-b border-white/10">
-         
-         {/* STICKY CONTAINER: This stays on screen while we scroll through the 400vh */}
-         <motion.div 
-            style={{ opacity: heroContainerOpacity }} // Fades out at the very end
-            className="sticky top-0 h-screen w-full flex flex-col justify-center items-center overflow-hidden"
-         >
-             
-             {/* Background Grid */}
-             <div className="absolute inset-0 opacity-30 pointer-events-none z-0">
-                 <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/80 to-transparent z-10"></div>
-                 <motion.div 
-                    animate={{ backgroundPosition: ["0px 0px", "0px 100px"] }}
-                    transition={{ repeat: Infinity, ease: "linear", duration: 5 }}
-                    className="w-full h-[150%] absolute -top-[25%] left-0"
-                    style={{ 
-                        backgroundImage: 'linear-gradient(white 1px, transparent 1px), linear-gradient(90deg, white 1px, transparent 1px)',
-                        backgroundSize: '100px 100px',
-                        transform: 'perspective(500px) rotateX(60deg)'
-                    }}
-                 />
-             </div>
-
-             {/* MAIN CONTENT WRAPPER - This handles the Shake */}
-             <motion.div 
-                style={{ x: shakeX, y: shakeY }}
-                className="relative z-20 flex flex-col items-center justify-center h-full w-full"
-             >
-
-                 {/* HEADLINES */}
-                 <div className="text-center relative mb-24">
-                    
-                    {/* Top Text: Fixed until 80%, then splits UP */}
-                    <motion.div
-                        style={{ y: splitUp, rotate: splitRotateLeft }}
-                    >
-                        <h1 className="text-[12vw] md:text-[9vw] leading-[0.8] font-black uppercase tracking-tighter text-white drop-shadow-2xl">
-                            Beyond
-                        </h1>
-                    </motion.div>
-
-                    {/* Bottom Text: Fixed until 80%, then splits DOWN */}
-                    <motion.div
-                        style={{ y: splitDown, rotate: splitRotateRight }}
-                    >
-                        <h1 className="text-[12vw] md:text-[9vw] leading-[0.8] font-black uppercase tracking-tighter text-gray-500">
-                            The Frame
-                        </h1>
-                    </motion.div>
-
-                 </div>
-
-                 {/* --- LOCK MECHANISM --- */}
-                 {/* Placed inside the vibrating container, but handled with its own opacity */}
-                 <motion.div 
-                    style={{ opacity: lockContainerOpacity }}
-                    className="absolute bottom-20 left-0 w-full flex flex-col items-center justify-center mix-blend-screen pointer-events-none"
-                 >
-                    
-                    {/* The Lens Container */}
-                    <motion.div 
-                        style={{ scale: lockScale }}
-                        className="relative w-48 h-48 flex items-center justify-center"
-                    >
-                         {/* SVG Progress Ring */}
-                         <svg className="absolute inset-0 w-full h-full -rotate-90 drop-shadow-[0_0_15px_rgba(255,255,255,0.1)]" viewBox="0 0 100 100">
-                            <circle cx="50" cy="50" r="45" stroke="#222" strokeWidth="1.5" fill="none" strokeDasharray="2 4" />
-                            <motion.circle 
-                                cx="50" cy="50" r="45" stroke="#06b6d4" strokeWidth="2.5" fill="none" strokeLinecap="round"
-                                style={{ pathLength: pathLength, stroke: ringColor }}
-                            />
-                         </svg>
-
-                         {/* Icons */}
-                        <div className="relative z-10 flex items-center justify-center w-full h-full">
-                            <motion.div style={{ opacity: closedLockOpacity }} className="absolute text-cyan-500 flex items-center justify-center">
-                                <Lock size={48} strokeWidth={1.5} />
-                            </motion.div>
-                            <motion.div style={{ opacity: openLockOpacity }} className="absolute text-green-500 flex items-center justify-center">
-                                <Unlock size={56} strokeWidth={1.5} />
-                            </motion.div>
-                        </div>
-                        
-                        <div className="absolute inset-2 w-auto h-auto animate-spin-slow opacity-10 border border-dotted border-white rounded-full"></div>
-                    </motion.div>
-
-                    {/* Status Text */}
-                    <div className="mt-2 font-mono text-xs tracking-[0.3em] font-bold h-6 relative w-full text-center">
-                        <motion.div style={{ opacity: loadingTextOpacity }} className="absolute inset-0 text-cyan-500 flex items-center justify-center gap-2">
-                            <Aperture size={14} className="animate-spin" />
-                            <span>FOCUSING...</span>
-                        </motion.div>
-                        <motion.div style={{ opacity: successTextOpacity }} className="absolute inset-0 text-green-500 flex items-center justify-center gap-2">
-                             <span>UNLOCKED</span>
-                        </motion.div>
-                    </div>
-
-                 </motion.div>
-
-             </motion.div>
-         </motion.div>
-      </section>
-
-
-      {/* --- SECTION 2: THE OPERATOR --- */}
-      {/* This section sits naturally below the 400vh hero. It will only appear when Hero is done. */}
-      {/* Added z-30 and background to ensure it covers any remnants if they exist */}
-      <section className="relative z-30 bg-[#050505] min-h-screen flex items-center"> 
-        <div className="container mx-auto px-4 py-20 lg:py-32">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-20 items-center">
-            
-            {/* LEFT: 3D TILT CARD */}
-            <div className="relative flex justify-center perspective-1000">
-                <TiltCard>
-                    <div className="relative w-[85vw] md:w-[400px] h-[500px] bg-[#0a0a0a] border border-white/20 group overflow-hidden">
-                        <div className="absolute top-0 left-0 w-full p-4 flex justify-between items-center z-20 mix-blend-difference text-white">
-                            <Hexagon size={20} className="animate-spin-slow" />
-                            <span className="font-mono text-xs">ID: RINSHAD_01</span>
-                        </div>
-                        <img 
-                            src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1887&auto=format&fit=crop&grayscale" 
-                            alt="Rinshad"
-                            className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-110 transition-all duration-700 ease-out"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-90"></div>
-                        <div className="absolute bottom-6 left-6 z-20">
-                            <h2 className="text-4xl font-black uppercase italic">Rinshad</h2>
-                            <p className="font-mono text-cyan-500 text-sm mt-1">/// VISUAL_DIRECTOR</p>
-                        </div>
-                    </div>
-                </TiltCard>
-                <div className="absolute -z-10 top-10 -left-10 w-full h-full border border-dashed border-white/10 hidden md:block"></div>
-            </div>
-
-            {/* RIGHT: CONTENT */}
-            <div className="flex flex-col gap-10">
-                <div className="space-y-6">
-                    <div className="flex items-center gap-3">
-                        <div className="w-2 h-2 bg-cyan-500"></div>
-                        <h3 className="font-mono text-sm tracking-widest text-gray-500">THE_NARRATIVE</h3>
-                    </div>
-                    <p className="text-2xl md:text-4xl font-light leading-tight text-gray-200">
-                        "I don't capture moments; I <span className="italic font-serif text-cyan-500">distort</span> them until they tell the truth."
-                    </p>
-                    <p className="text-gray-400 leading-relaxed max-w-md">
-                        Based in <b className="text-white">Kerala</b>. Specializing in high-contrast editorial and automotive visuals. My work exists in the glitch between traditional composition and digital chaos.
-                    </p>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                      <SocialButton icon={<Instagram/>} label="IG" />
-                      <SocialButton icon={<Twitter/>} label="X" />
-                      <SocialButton icon={<Linkedin/>} label="IN" />
-                      <SocialButton icon={<Mail/>} label="MAIL" />
-                </div>
-            </div>
-        </div>
-        </div>
-      </section>
-
-      {/* --- MARQUEE --- */}
-      <div className="py-10 border-y border-white/10 bg-white/5 backdrop-blur-sm overflow-hidden relative z-20">
-          <div className="absolute inset-0 bg-grid-white/[0.05] pointer-events-none" />
-          <motion.div 
-             className="flex gap-16 whitespace-nowrap text-6xl md:text-8xl font-black text-white/5 uppercase select-none"
-             animate={{ x: ["0%", "-50%"] }}
-             transition={{ repeat: Infinity, ease: "linear", duration: 15 }}
-          >
-              <span>Vision</span> <span>•</span> <span>Chaos</span> <span>•</span> <span>Control</span> <span>•</span> <span>Vision</span> <span>•</span> <span>Chaos</span> <span>•</span> <span>Control</span>
-          </motion.div>
-      </div>
-
-      {/* --- FOOTER --- */}
-      <footer className="p-10 md:p-20 flex flex-col md:flex-row justify-between items-center gap-6 text-center md:text-left relative z-20">
-         <div className="text-sm font-mono text-gray-600">
-            <p className="text-white mb-2 font-bold">VNX / WEBWORKS</p>
-            <p>Veliancode, Kerala</p>
-         </div>
-         <button onClick={() => window.scrollTo({top:0, behavior:'smooth'})} className="group p-4 border border-white/10 rounded-full hover:bg-white hover:text-black transition-all">
-            <ArrowDown className="rotate-180 group-hover:-translate-y-1 transition-transform" />
-         </button>
-      </footer>
-    </div>
-  );
-};
-
-// --- HELPER COMPONENTS ---
-
-const TiltCard = ({ children }) => {
-    const x = useSpring(0, { stiffness: 150, damping: 20 });
-    const y = useSpring(0, { stiffness: 150, damping: 20 });
-    const handleMouseMove = (e) => {
-        const rect = e.currentTarget.getBoundingClientRect();
-        const xPct = (e.clientX - rect.left) / rect.width - 0.5;
-        const yPct = (e.clientY - rect.top) / rect.height - 0.5;
-        x.set(xPct * 20); y.set(yPct * -20);
-    };
     return (
-        <motion.div onMouseMove={handleMouseMove} onMouseLeave={() => {x.set(0); y.set(0)}} style={{ rotateY: x, rotateX: y, transformStyle: "preserve-3d" }} className="relative cursor-pointer">
-            <div style={{ transform: "translateZ(50px)" }}>{children}</div>
-        </motion.div>
+        <div ref={mainContainerRef} className="bg-black text-white overflow-hidden font-sans">
+
+            {/* === HERO SECTION === */}
+            <section className="relative h-screen flex items-center justify-start overflow-hidden">
+                {/* Background Image with Neon Overlay */}
+                <div ref={heroImageBgRef} className="absolute inset-0 z-0">
+                    <div className="absolute inset-0 bg-gradient-to-r from-black via-black/70 to-cyan-900/30 mix-blend-multiply z-10"></div>
+                    <img
+                        // Placeholder: A high contrast, dark, moody image
+                        src="https://images.unsplash.com/photo-1493895583953-015a0d31c12d?q=80&w=2070&auto=format&fit=crop"
+                        alt="Photographer Aesthetic"
+                        className="w-full h-full object-cover grayscale contrast-125"
+                    />
+                </div>
+
+                <div className="container mx-auto px-6 relative z-20">
+                    <div ref={heroTextRef} className="max-w-4xl">
+                        {/* Neon Cyan Accent Text */}
+                        <h2 className="text-cyan-400 font-mono tracking-[0.2em] uppercase mb-6 text-sm md:text-base drop-shadow-[0_0_10px_rgba(34,211,238,0.8)] opacity-0">
+                            The World in Monochrome & Light
+                        </h2>
+                        <h1 className="text-6xl md:text-8xl font-black text-white mb-8 leading-none uppercase opacity-0">
+                            CHASING <br />
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-neutral-500">SHADOWS</span>, <br />
+                            FRAMING <span className="text-cyan-400 drop-shadow-[0_0_15px_rgba(34,211,238,1)]">NEON</span>.
+                        </h1>
+                        <p className="text-xl text-neutral-300 mb-10 max-w-xl opacity-0 font-light border-l-2 border-cyan-400 pl-6">
+                            Visual storyteller obsessed with high contrast, urban decay, and the artificial light that cuts through the darkness.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+
+            {/* === BIO SECTION (The Artist) === */}
+            <section ref={bioRef} className="py-32 container mx-auto px-6 relative z-10">
+                <div className="grid md:grid-cols-2 gap-20 items-center">
+                    {/* Image Side */}
+                    <div className="relative group">
+                        {/* Neon Frame Effect */}
+                        <div className="absolute inset-0 border-2 border-cyan-400 translate-x-4 translate-y-4 group-hover:translate-x-2 group-hover:translate-y-2 transition-transform duration-500 shadow-[0_0_20px_rgba(34,211,238,0.3)]"></div>
+                        <div className="relative h-[600px] bg-neutral-900 overflow-hidden contrast-125 grayscale">
+                            {/* Placeholder: Photographer portrait */}
+                            <img
+                                src="https://images.unsplash.com/photo-1556157382-97eda2d62296?q=80&w=2070&auto=format&fit=crop"
+                                alt="The Photographer"
+                                className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700"
+                            />
+                        </div>
+                    </div>
+
+                    {/* Text Side */}
+                    <div className="space-y-10">
+                        <h2 className="text-5xl font-black uppercase tracking-tight opacity-0">
+                            Behind The <span className="text-cyan-400">Lens</span>.
+                        </h2>
+                        <div className="space-y-6 text-lg text-neutral-300 font-light leading-relaxed">
+                            <p className="opacity-0">
+                                I don't just take pictures; I hunt for moments where reality looks like a film noir set. Based in the concrete jungle, I started armed with an old analog Canon and a fascination for how the city changes when the sun goes down.
+                            </p>
+                            <p className="opacity-0">
+                                My aesthetic is defined by a strict adherence to black and white for structure, punctuated by the aggressive intrusion of modern, artificial light. It's about finding the silence in the noise.
+                            </p>
+                            <p className="opacity-0">
+                                Whether shooting editorial spreads or personal street projects, my goal remains the same: to freeze the kinetic energy of modern life into a singular, striking frame.
+                            </p>
+                        </div>
+                        <div className="opacity-0 pt-4">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/3/3a/Signature_placeholder.png" alt="Signature" className="h-16 invert opacity-60" />
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+
+            {/* === AREAS OF FOCUS === */}
+            <section className="py-32 bg-neutral-950 relative">
+                {/* Subtle neon grid background */}
+                <div className="absolute inset-0 bg-[linear-gradient(rgba(34,211,238,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(34,211,238,0.03)_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,#000_70%,transparent_110%)]"></div>
+
+                <div ref={focusAreasRef} className="container mx-auto px-6 relative z-10">
+                    <div className="text-left mb-20 border-b border-neutral-800 pb-8">
+                        <h2 className="text-cyan-400 font-mono tracking-wider uppercase mb-4 drop-shadow-[0_0_8px_rgba(34,211,238,0.6)]">My Craft</h2>
+                        <h3 className="text-5xl font-black text-white uppercase">Areas of Focus</h3>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-px bg-neutral-800 border border-neutral-800">
+                        {focusAreas.map((area, index) => (
+                            <div key={index} className="focus-item bg-black p-10 group hover:bg-neutral-950 transition-colors duration-300 opacity-0">
+                                <div className="mb-6 text-cyan-400/50 group-hover:text-cyan-400 transition-colors duration-300 drop-shadow-[0_0_5px_rgba(34,211,238,0.5)]">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-aperture"><circle cx="12" cy="12" r="10" /><path d="m14.31 8 5.74 9.94" /><path d="M9.69 8h11.48" /><path d="m7.38 12 5.74-9.94" /><path d="M9.69 16 3.95 6.06" /><path d="M14.31 16H2.83" /><path d="m16.62 12-5.74 9.94" /></svg>
+                                </div>
+                                <h4 className="font-bold text-white text-2xl mb-4 uppercase tracking-wider group-hover:text-cyan-400 transition-colors">{area.title}</h4>
+                                <p className="text-neutral-400 font-light">{area.desc}</p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+
+            {/* === EXHIBITIONS & MILESTONES TIMELINE === */}
+            <section className="py-32 container mx-auto px-6 relative">
+                <div className="text-center mb-24">
+                    <h2 className="text-5xl font-black text-white uppercase">Milestones & <span className="text-cyan-400 drop-shadow-[0_0_10px_rgba(34,211,238,0.8)]">Exhibits</span></h2>
+                </div>
+
+                <div ref={timelineRef} className="relative space-y-16 max-w-4xl mx-auto">
+                    {/* Glowing Neon Vertical Line */}
+                    <div className="absolute left-0 md:left-1/2 top-0 h-full w-px bg-cyan-500/30 shadow-[0_0_15px_rgba(34,211,238,0.6)] -ml-[0.5px] hidden md:block"></div>
+
+                    {timelineData.map((item, index) => (
+                        <div key={index} className={`timeline-item relative flex flex-col md:flex-row gap-12 items-center opacity-0 ${index % 2 === 0 ? 'md:flex-row-reverse' : ''}`}>
+
+                            {/* Glowing Dot Indicator */}
+                            <div className="absolute left-0 md:left-1/2 top-0 md:top-8 w-6 h-6 rounded-full bg-black border-4 border-cyan-400 shadow-[0_0_20px_rgba(34,211,238,1)] -translate-x-3 md:-translate-x-3 z-20"></div>
+
+                            {/* Date Block */}
+                            <div className={`w-full md:w-1/2 ${index % 2 === 0 ? 'md:text-right' : 'text-left'}`}>
+                                <span className="inline-block py-2 px-6 border-2 border-cyan-400/50 text-cyan-400 text-xl font-mono font-bold tracking-widest shadow-[0_0_10px_rgba(34,211,238,0.2)] bg-black">{item.year}</span>
+                            </div>
+
+                            {/* Content Block */}
+                            <div className="w-full md:w-1/2 bg-neutral-950 p-10 border border-neutral-800 hover:border-cyan-400/50 transition-colors duration-500 group z-10 relative">
+                                <h3 className="text-2xl font-bold text-white mb-2 uppercase group-hover:text-cyan-400 transition-colors">{item.title}</h3>
+                                <h4 className="text-neutral-400 font-mono text-sm mb-6 uppercase tracking-wider">{item.location}</h4>
+                                <p className="text-neutral-300 font-light leading-relaxed">{item.description}</p>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </section>
+
+
+            {/* === CTA SECTION === */}
+            <section className="py-40 bg-black text-center px-6 relative overflow-hidden">
+                {/* Background glow effect */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-cyan-500/20 blur-[120px] rounded-full opacity-50 pointer-events-none"></div>
+
+                <div className="max-w-3xl mx-auto relative z-10">
+                    <h2 className="text-5xl md:text-7xl font-black text-white mb-12 uppercase leading-tight">
+                        Ready to create something <span className="text-cyan-400 drop-shadow-[0_0_15px_rgba(34,211,238,1)]">striking</span>?
+                    </h2>
+                    <button className="group relative inline-flex h-16 items-center justify-center overflow-hidden rounded-none bg-transparent px-12 font-bold text-white transition-all duration-500">
+                        <span className="absolute inset-0 border-2 border-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.5)] group-hover:bg-cyan-400 group-hover:shadow-[0_0_30px_rgba(34,211,238,1)] transition-all duration-500"></span>
+                        <span className="relative z-20 uppercase tracking-[0.2em] group-hover:text-black transition-colors duration-500">Book A Consultation</span>
+                    </button>
+                </div>
+            </section>
+
+        </div>
     );
 };
-
-const SocialButton = ({ icon, label }) => (
-    <a href="#" className="flex items-center gap-3 p-4 border border-white/10 hover:bg-white hover:text-black hover:border-white transition-all duration-300 group">
-        <span className="group-hover:scale-110 transition-transform">{icon}</span>
-        <span className="font-mono text-sm tracking-widest">{label}</span>
-    </a>
-);
 
 export default AboutPage;
