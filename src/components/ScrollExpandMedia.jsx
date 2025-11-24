@@ -146,14 +146,7 @@ export default function ScrollExpandMedia({
                 <div className="h-[50vh] w-full pointer-events-none"></div>
 
                 {/* Actual Content - with a background to wipe over the video */}
-                <section
-                    ref={contentSectionRef}
-                    className="w-full px-6 py-24 md:px-12 bg-black/80 backdrop-blur-md min-h-screen flex items-center border-t border-white/10"
-                >
-                    <div className="max-w-4xl mx-auto text-lg leading-relaxed text-gray-300">
-                        {children}
-                    </div>
-                </section>
+
             </div>
         </div>
     );
