@@ -66,16 +66,19 @@ const ViewfinderSection = () => {
   }, []);
 
   return (
-    <section className="bg-[#2F3E2F] min-h-screen py-10 md:py-20 px-4 md:px-12 flex flex-col-reverse md:flex-row items-center gap-8 md:gap-12 overflow-hidden">
+    // Applied global font-sans (Inter)
+    <section className="bg-[#2F3E2F] min-h-screen py-10 md:py-20 px-4 md:px-12 flex flex-col-reverse md:flex-row items-center gap-8 md:gap-12 overflow-hidden font-sans">
       
       {/* --- LEFT: SERVICE MENU (Controls) --- */}
       <div className="w-full md:w-1/3 flex flex-col gap-2 z-20">
          <div className="mb-4 md:mb-8">
             <div className="flex items-center gap-2 mb-2 text-[#A3B18A]">
                <Scan size={18} />
-               <span className="text-xs font-mono uppercase tracking-widest">Select Mode</span>
+               {/* Label - Nav Style */}
+               <span className="text-xs font-sans font-medium uppercase tracking-[0.25em]">Select Mode</span>
             </div>
-            <h2 className="text-3xl md:text-5xl font-serif text-[#E8E6E0]">Expertise</h2>
+            {/* Heading - Playfair Medium */}
+            <h2 className="text-3xl md:text-5xl font-serif font-medium text-[#E8E6E0]">Expertise</h2>
          </div>
 
          <div className="flex flex-col border-l border-[#E8E6E0]/10">
@@ -98,13 +101,14 @@ const ViewfinderSection = () => {
                      />
                   )}
 
-                  <span className={`text-lg md:text-xl font-serif transition-colors duration-300 ${activeService.id === item.id ? 'text-[#E8E6E0]' : 'text-[#E8E6E0]/40'}`}>
+                  {/* Label - Playfair Medium */}
+                  <span className={`text-lg md:text-xl font-serif font-medium transition-colors duration-300 ${activeService.id === item.id ? 'text-[#E8E6E0]' : 'text-[#E8E6E0]/40'}`}>
                      {item.label}
                   </span>
                   
-                  {/* Mobile Description (Visible only when active) */}
+                  {/* Mobile Description - Inter Normal */}
                   <div className={`md:hidden overflow-hidden transition-all duration-300 ${activeService.id === item.id ? 'max-h-20 opacity-100 mt-2' : 'max-h-0 opacity-0'}`}>
-                     <p className="text-[#E8E6E0]/60 text-xs leading-relaxed">{item.desc}</p>
+                     <p className="text-[#E8E6E0]/60 text-xs font-sans font-normal leading-relaxed">{item.desc}</p>
                   </div>
                </button>
             ))}
@@ -125,27 +129,28 @@ const ViewfinderSection = () => {
                <AnimatePresence mode="wait">
                   <motion.div
                      key={activeService.id}
-                     initial={{ opacity: 0, scale: 1.05 }} // Reduced scale for faster feel
+                     initial={{ opacity: 0, scale: 1.05 }} 
                      animate={{ opacity: 1, scale: 1 }}
                      exit={{ opacity: 0 }}
-                     transition={{ duration: 0.4, ease: "easeOut" }} // Faster transition
+                     transition={{ duration: 0.4, ease: "easeOut" }} 
                      className="absolute inset-0 w-full h-full"
                   >
                      <img 
                         src={activeService.img} 
                         alt={activeService.label} 
                         className="w-full h-full object-cover opacity-80"
-                        loading="eager" // Force immediate load
-                        fetchPriority="high" // Prioritize this image
+                        loading="eager" 
+                        fetchPriority="high" 
                      />
                   </motion.div>
                </AnimatePresence>
 
                {/* 2. CAMERA UI OVERLAY (Responsive HUD) */}
+               {/* Updated fonts to Inter Uppercase Tracking 0.25em */}
                <div className="absolute inset-0 p-4 md:p-6 flex flex-col justify-between pointer-events-none z-10">
                   
                   {/* Top Bar */}
-                  <div className="flex justify-between items-start text-[#E8E6E0] text-[10px] md:text-xs font-mono tracking-widest">
+                  <div className="flex justify-between items-start text-[#E8E6E0] text-[10px] md:text-xs font-sans font-medium uppercase tracking-[0.25em]">
                      <div className="flex gap-2 md:gap-4">
                         <span className="bg-[#A3B18A] text-[#2F3E2F] px-1 rounded-sm font-bold">AF-C</span>
                         <span className="hidden md:inline">RAW</span>
@@ -157,7 +162,7 @@ const ViewfinderSection = () => {
                      </div>
                   </div>
 
-                  {/* Focus Brackets (Responsive Size) */}
+                  {/* Focus Brackets */}
                   <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 md:w-32 md:h-32 border border-[#E8E6E0]/30 flex items-center justify-center">
                      <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-[#A3B18A] rounded-full animate-pulse"></div>
                      {/* Corner Marks */}
@@ -170,8 +175,8 @@ const ViewfinderSection = () => {
                   {/* Bottom Bar (Settings) */}
                   <div className="flex justify-between items-end text-[#E8E6E0]">
                      
-                     {/* Dynamic Parameters (Compact on Mobile) */}
-                     <div className="flex gap-3 md:gap-8 font-mono text-[9px] md:text-sm">
+                     {/* Dynamic Parameters */}
+                     <div className="flex gap-3 md:gap-8 font-sans font-medium uppercase tracking-[0.25em] text-[9px] md:text-xs">
                         <div className="flex flex-col">
                            <span className="text-[#E8E6E0]/50 text-[6px] md:text-[8px] uppercase">Shutter</span>
                            <span>{activeService.shutter}</span>
@@ -212,15 +217,18 @@ const ViewfinderSection = () => {
             {/* REC DOT */}
             <div className="absolute top-4 right-4 md:top-6 md:right-6 flex items-center gap-2 z-20">
                <div className="w-2 h-2 md:w-3 md:h-3 bg-red-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.5)]"></div>
-               <span className="text-red-500 font-mono text-[10px] md:text-xs font-bold tracking-widest">REC</span>
+               {/* Label - Nav Style */}
+               <span className="text-red-500 font-sans font-medium text-[10px] md:text-xs uppercase tracking-[0.25em]">REC</span>
             </div>
 
          </div>
          
          {/* Desktop Description Overlay */}
          <div className="absolute -bottom-6 -left-6 bg-[#E8E6E0] p-6 max-w-xs shadow-xl hidden md:block">
-            <h4 className="text-[#2F3E2F] font-serif text-xl mb-2">{activeService.label}</h4>
-            <p className="text-[#2F3E2F]/70 text-xs leading-relaxed">
+            {/* Heading - Playfair Medium */}
+            <h4 className="text-[#2F3E2F] font-serif font-medium text-xl mb-2">{activeService.label}</h4>
+            {/* Body - Inter Normal */}
+            <p className="text-[#2F3E2F]/70 text-xs font-sans font-normal leading-relaxed">
                {activeService.desc}
             </p>
          </div>

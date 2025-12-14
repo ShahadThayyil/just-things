@@ -26,13 +26,16 @@ const FilterableGallery = () => {
     : allProjects.filter(item => item.category === activeCategory);
 
   return (
-    <section className="bg-[#2F3E2F] min-h-screen py-20 px-4 md:px-12 w-full text-[#E8E6E0]">
+    // Applied global font-sans (Inter)
+    <section className="bg-[#2F3E2F] min-h-screen py-20 px-4 md:px-12 w-full text-[#E8E6E0] font-sans">
       
       {/* --- HEADER & FILTERS --- */}
       <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-8">
          <div>
-            <span className="text-[#A3B18A] uppercase tracking-[0.3em] text-xs font-bold block mb-4">Archive</span>
-            <h2 className="text-4xl md:text-7xl font-serif leading-[0.9]">
+            {/* Label - Nav Style */}
+            <span className="text-[#A3B18A] font-sans font-medium uppercase tracking-[0.25em] text-xs block mb-4">Archive</span>
+            {/* H2 - Playfair Medium */}
+            <h2 className="text-4xl md:text-7xl font-serif font-medium leading-[0.9]">
                Curated <br/> <span className="italic text-[#A3B18A]">Works</span>
             </h2>
          </div>
@@ -44,7 +47,8 @@ const FilterableGallery = () => {
                   onClick={() => setActiveCategory(cat)}
                   className="relative group pb-1"
                >
-                  <span className={`text-xs md:text-base tracking-widest uppercase font-bold transition-colors duration-300 ${activeCategory === cat ? 'text-[#A3B18A]' : 'text-[#E8E6E0]/50 hover:text-[#E8E6E0]'}`}>
+                  {/* Filter Buttons - Nav Style (Inter, 0.25em tracking) */}
+                  <span className={`text-xs md:text-xs font-sans font-medium tracking-[0.25em] uppercase transition-colors duration-300 ${activeCategory === cat ? 'text-[#A3B18A]' : 'text-[#E8E6E0]/50 hover:text-[#E8E6E0]'}`}>
                      {cat}
                   </span>
                   {activeCategory === cat && (
@@ -100,7 +104,6 @@ const GalleryCard = ({ data, onClick }) => {
              layoutId={`img-${data.id}`} 
              src={data.src} 
              alt={data.title} 
-             // MOBILE FIX: Full color by default on mobile, B&W on desktop
              className="w-full h-full object-cover transition-transform duration-[1.2s] ease-out group-hover:scale-110 grayscale-0 md:grayscale md:group-hover:grayscale-0"
           />
           {/* Overlay only on desktop */}
@@ -117,10 +120,12 @@ const GalleryCard = ({ data, onClick }) => {
        {/* Text */}
        <div className="flex justify-between items-start border-t border-[#E8E6E0]/10 pt-4">
           <div>
-             <motion.h3 layoutId={`title-${data.id}`} className="text-xl md:text-2xl font-serif text-[#E8E6E0] mb-1">{data.title}</motion.h3>
-             <motion.span layoutId={`cat-${data.id}`} className="text-[#A3B18A] text-[10px] md:text-xs font-mono uppercase tracking-wider">{data.category}</motion.span>
+             {/* Title - Playfair Medium */}
+             <motion.h3 layoutId={`title-${data.id}`} className="text-xl md:text-2xl font-serif font-medium text-[#E8E6E0] mb-1">{data.title}</motion.h3>
+             {/* Category - Nav Style Small */}
+             <motion.span layoutId={`cat-${data.id}`} className="text-[#A3B18A] text-[10px] md:text-xs font-sans font-medium uppercase tracking-[0.2em]">{data.category}</motion.span>
           </div>
-          <span className="text-[#E8E6E0]/30 text-[10px] md:text-xs font-mono">2024</span>
+          <span className="text-[#E8E6E0]/30 text-[10px] md:text-xs font-sans font-medium tracking-[0.1em]">2024</span>
        </div>
     </motion.div>
   );
@@ -131,7 +136,7 @@ const ProjectModal = ({ data, onClose }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-8">
        
-       {/* 1. Backdrop (Click to close) */}
+       {/* 1. Backdrop */}
        <motion.div 
           initial={{ opacity: 0 }} 
           animate={{ opacity: 1 }} 
@@ -164,7 +169,6 @@ const ProjectModal = ({ data, onClose }) => {
           </button>
 
           {/* --- IMAGE SECTION --- */}
-          {/* Mobile: Full height fit / Desktop: Half width */}
           <div className="w-full md:w-1/2 h-auto max-h-[80vh] md:max-h-full md:h-auto relative shrink-0 flex items-center justify-center">
              <motion.img 
                 layoutId={`img-${data.id}`} 
@@ -173,8 +177,7 @@ const ProjectModal = ({ data, onClose }) => {
              />
           </div>
 
-          {/* --- CONTENT SECTION (HIDDEN ON MOBILE) --- */}
-          {/* This div is 'hidden' on default (mobile) and 'flex' on md (desktop) */}
+          {/* --- CONTENT SECTION --- */}
           <div className="hidden md:flex w-full md:w-1/2 p-6 md:p-16 flex-col justify-center relative bg-[#2F3E2F]">
              
              {/* Header */}
@@ -183,27 +186,29 @@ const ProjectModal = ({ data, onClose }) => {
                    <div className="p-1.5 bg-[#A3B18A]/10 rounded-full text-[#A3B18A]">
                       <Tag size={14} />
                    </div>
-                   <motion.span layoutId={`cat-${data.id}`} className="text-[#A3B18A] text-xs font-bold uppercase tracking-widest">
+                   {/* Category - Nav Style */}
+                   <motion.span layoutId={`cat-${data.id}`} className="text-[#A3B18A] text-xs font-sans font-medium uppercase tracking-[0.25em]">
                       {data.category} Project
                    </motion.span>
                 </div>
-                <motion.h2 layoutId={`title-${data.id}`} className="text-3xl md:text-6xl font-serif text-[#E8E6E0] leading-none mb-4">
+                {/* Title - Playfair Medium */}
+                <motion.h2 layoutId={`title-${data.id}`} className="text-3xl md:text-6xl font-serif font-medium text-[#E8E6E0] leading-none mb-4">
                    {data.title}
                 </motion.h2>
                 <div className="w-16 h-[1px] bg-[#E8E6E0]/20"></div>
              </div>
 
-             {/* Body */}
+             {/* Body - Inter Normal */}
              <motion.p 
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="text-[#E8E6E0]/70 text-sm md:text-lg font-light leading-relaxed mb-6 md:mb-8"
+                className="text-[#E8E6E0]/70 text-sm md:text-lg font-sans font-normal leading-relaxed mb-6 md:mb-8"
              >
                 {data.desc}
              </motion.p>
 
-             {/* Footer Details */}
+             {/* Footer Details - Nav Style */}
              <motion.div 
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -211,12 +216,12 @@ const ProjectModal = ({ data, onClose }) => {
                 className="grid grid-cols-2 gap-4 border-t border-[#E8E6E0]/10 pt-6 mt-auto md:mt-0"
              >
                 <div>
-                   <span className="text-[#E8E6E0]/40 text-[10px] uppercase tracking-widest block mb-1">Date</span>
-                   <span className="text-[#E8E6E0] font-mono text-xs md:text-sm">Oct 2024</span>
+                   <span className="text-[#E8E6E0]/40 text-[10px] font-sans font-medium uppercase tracking-[0.2em] block mb-1">Date</span>
+                   <span className="text-[#E8E6E0] font-sans font-medium text-xs md:text-sm tracking-wide">Oct 2024</span>
                 </div>
                 <div>
-                   <span className="text-[#E8E6E0]/40 text-[10px] uppercase tracking-widest block mb-1">Camera</span>
-                   <span className="text-[#E8E6E0] font-mono text-xs md:text-sm">Sony A7SIII</span>
+                   <span className="text-[#E8E6E0]/40 text-[10px] font-sans font-medium uppercase tracking-[0.2em] block mb-1">Camera</span>
+                   <span className="text-[#E8E6E0] font-sans font-medium text-xs md:text-sm tracking-wide">Sony A7SIII</span>
                 </div>
              </motion.div>
 
